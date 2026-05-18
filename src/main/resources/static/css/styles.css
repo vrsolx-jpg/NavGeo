@@ -1,0 +1,355 @@
+/* ================================================================
+   NavGeo — Estilos Principales
+   Archivo: src/main/resources/static/css/styles.css
+
+   Arquitectura del layout:
+   - El body usa display:flex para crear el layout sidebar + mapa.
+   - El sidebar tiene ancho fijo de 320px.
+   - El mapa ocupa flex:1 (todo el espacio restante).
+   - Este diseño es exclusivo para pantallas PC (min-width: 1280px).
+   ================================================================ */
+
+/* ----------------------------------------------------------------
+   VARIABLES CSS (Design Tokens)
+   Centralizar colores, fuentes y sombras aquí facilita el
+   mantenimiento: cambiar un color en un lugar lo actualiza en toda
+   la aplicación.
+   ---------------------------------------------------------------- */
+:root {
+    --font-display:     'Sora', sans-serif;
+    --font-body:        'Inter', sans-serif;
+
+    /* Paleta principal: azul oscuro de ciudad nocturna */
+    --color-bg:         #0F172A;         /* fondo sidebar */
+    --color-surface:    #1E293B;         /* cards y secciones */
+    --color-border:     rgba(255,255,255,0.07);
+    --color-text:       #E2E8F0;         /* texto principal */
+    --color-muted:      #64748B;         /* texto secundario */
+    --color-accent:     #6366F1;         /* índigo · color de acento */
+    --color-accent-glow:rgba(99,102,241,0.25);
+
+    /* Dimensiones del sidebar (fijo en PC) */
+    --sidebar-width:    320px;
+    --topbar-height:    44px;
+}
+
+/* ----------------------------------------------------------------
+   RESET Y BASE
+   ---------------------------------------------------------------- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+    overflow: hidden;           /* Previene scroll en el body */
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+/* Layout raíz: sidebar a la izquierda, mapa a la derecha */
+body {
+    display: flex;
+    flex-direction: row;
+}
+
+/* ----------------------------------------------------------------
+   SIDEBAR
+   ---------------------------------------------------------------- */
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    height: 100vh;
+    background: var(--color-bg);
+    border-right: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-surface) transparent;
+}
+
+/* Header del sidebar: logo + nombre */
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 24px 20px 20px;
+}
+
+.brand-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--color-accent);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: #fff;
+    box-shadow: 0 0 20px var(--color-accent-glow);
+    flex-shrink: 0;
+}
+
+.brand-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+}
+
+.brand-subtitle {
+    font-size: 11px;
+    color: var(--color-muted);
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+}
+
+/* Divider */
+.sidebar-divider {
+    height: 1px;
+    background: var(--color-border);
+    margin: 0 20px;
+}
+
+/* Secciones internas */
+.sidebar-section {
+    padding: 16px 20px;
+}
+
+.section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--color-muted);
+    margin-bottom: 10px;
+}
+
+/* ----------------------------------------------------------------
+   BOTONES DE RUTAS
+   ---------------------------------------------------------------- */
+.route-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.2s, border-color 0.2s;
+    color: var(--color-text);
+}
+
+.route-btn:hover {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+/* Estado activo: resalta la ruta seleccionada */
+.route-btn.active {
+    background: var(--color-surface);
+    border-color: var(--color-accent);
+    box-shadow: inset 0 0 0 1px var(--color-accent-glow);
+}
+
+/* Punto de color de la ruta (el cuadrado de color) */
+.route-indicator {
+    width: 6px;
+    height: 36px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.route-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.route-name {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    font-family: var(--font-display);
+}
+
+.route-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--color-muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.route-icon {
+    font-size: 14px;
+    color: var(--color-muted);
+    flex-shrink: 0;
+}
+
+/* ----------------------------------------------------------------
+   TARJETA DE INFORMACIÓN DE RUTA
+   ---------------------------------------------------------------- */
+.info-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 14px;
+}
+
+.info-header {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.info-desc {
+    font-size: 12px;
+    color: var(--color-muted);
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+/* Toggle Ida / Vuelta */
+.sentido-toggle {
+    display: flex;
+    gap: 8px;
+}
+
+.sentido-btn {
+    flex: 1;
+    padding: 7px 0;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sentido-btn.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #fff;
+}
+
+/* ----------------------------------------------------------------
+   LEYENDA
+   ---------------------------------------------------------------- */
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: var(--color-muted);
+    margin-bottom: 8px;
+}
+
+.legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ----------------------------------------------------------------
+   FOOTER DEL SIDEBAR
+   ---------------------------------------------------------------- */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid var(--color-border);
+    font-size: 10px;
+    color: var(--color-muted);
+    line-height: 1.7;
+}
+
+/* ----------------------------------------------------------------
+   ÁREA DEL MAPA
+   ---------------------------------------------------------------- */
+.map-wrapper {
+    flex: 1;                    /* Ocupa todo el ancho restante */
+    height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Barra de estado sobre el mapa */
+.map-topbar {
+    height: var(--topbar-height);
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.map-status {
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+.map-status i {
+    color: #10B981;              /* Verde: indicador de conexión activa */
+    margin-right: 6px;
+}
+
+.admin-link {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-decoration: none;
+    padding: 5px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.admin-link:hover {
+    color: var(--color-text);
+    border-color: var(--color-accent);
+    background: var(--color-accent-glow);
+}
+
+/* El div del mapa ocupa TODA la altura restante */
+#map {
+    flex: 1;
+    width: 100%;
+}
+
+.map-error {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #E5E7EB;
+    color: #1F2937;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.map-error i {
+    color: #EF4444;
+}

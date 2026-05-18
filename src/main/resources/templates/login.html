@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280">
+    <title>NavGeo — Acceso Administrativo</title>
+
+    <!-- Bootstrap 5 -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600&display=swap"
+          rel="stylesheet">
+
+    <style>
+        :root {
+            --font-display: 'Sora', sans-serif;
+            --font-body:    'Inter', sans-serif;
+            --color-bg:     #0F172A;
+            --color-surface:#1E293B;
+            --color-border: rgba(255,255,255,0.08);
+            --color-text:   #E2E8F0;
+            --color-muted:  #64748B;
+            --color-accent: #6366F1;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            /* Patrón de grilla sutil en el fondo */
+            background-image:
+                linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .login-card {
+            width: 420px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 20px;
+            padding: 48px 40px;
+        }
+
+        /* Logo / marca */
+        .login-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 36px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--color-accent);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+        }
+
+        .logo-title {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.5px;
+            line-height: 1;
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--color-muted);
+            margin-top: 3px;
+        }
+
+        h2.login-heading {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        p.login-subheading {
+            font-size: 13px;
+            color: var(--color-muted);
+            margin-bottom: 28px;
+            line-height: 1.5;
+        }
+
+        /* Campos del formulario */
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            background: var(--color-bg);
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            color: var(--color-text);
+            padding: 12px 16px;
+            font-size: 14px;
+            font-family: var(--font-body);
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            background: var(--color-bg);
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+            color: var(--color-text);
+            outline: none;
+        }
+
+        .form-control::placeholder { color: #374151; }
+
+        /* Botón de submit */
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: var(--color-accent);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-family: var(--font-display);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-top: 24px;
+        }
+
+        .btn-login:hover  { opacity: 0.9; }
+        .btn-login:active { transform: scale(0.99); }
+
+        /* Mensajes de alerta */
+        .alert-navgeo {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-error  { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25); color: #FCA5A5; }
+        .alert-success{ background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.25); color: #6EE7B7; }
+
+        /* Enlace de regreso */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--color-muted);
+            text-decoration: none;
+        }
+
+        .back-link:hover { color: var(--color-text); }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+
+    <!-- Branding -->
+    <div class="login-logo">
+        <div class="logo-icon"><i class="bi bi-bus-front-fill"></i></div>
+        <div>
+            <div class="logo-title">NavGeo</div>
+            <div class="logo-subtitle">Panel Administrativo</div>
+        </div>
+    </div>
+
+    <h2 class="login-heading">Acceso seguro</h2>
+    <p class="login-subheading">
+        Esta área está restringida al personal autorizado de administración
+        de rutas y paraderos.
+    </p>
+
+    <!-- Mensaje de error (Spring Security pasa ?error=true a la URL) -->
+    <!--
+        th:if="${errorMsg}" es una expresión Thymeleaf. Se evalúa en el
+        servidor: si el atributo errorMsg existe en el Model, muestra
+        este div; si no, no genera ningún HTML.
+    -->
+    <div class="alert-navgeo alert-error" th:if="${errorMsg}">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${errorMsg}">Error de autenticación.</span>
+    </div>
+
+    <!-- Mensaje de logout exitoso -->
+    <div class="alert-navgeo alert-success" th:if="${logoutMsg}">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${logoutMsg}">Sesión cerrada correctamente.</span>
+    </div>
+
+    <!--
+        FORMULARIO DE LOGIN
+        La URL de acción es /login (POST). Spring Security intercepta
+        automáticamente esta petición. Los nombres de los campos DEBEN
+        ser "username" y "password" (nombres esperados por Spring Security
+        por defecto). No necesitamos un @PostMapping en el controlador.
+    -->
+    <form method="post" th:action="@{/login}">
+
+        <!-- Token CSRF: Spring Security lo requiere en todos los formularios
+             POST para prevenir ataques Cross-Site Request Forgery.
+             Thymeleaf lo inyecta automáticamente con th:action. -->
+
+        <div class="mb-3">
+            <label for="username" class="form-label">Usuario</label>
+            <input type="text"
+                   id="username"
+                   name="username"
+                   class="form-control"
+                   placeholder="Ingresa tu nombre de usuario"
+                   autocomplete="username"
+                   required>
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Contraseña</label>
+            <input type="password"
+                   id="password"
+                   name="password"
+                   class="form-control"
+                   placeholder="••••••••••"
+                   autocomplete="current-password"
+                   required>
+        </div>
+
+        <button type="submit" class="btn-login">
+            <i class="bi bi-shield-lock-fill me-2"></i>
+            Iniciar sesión
+        </button>
+    </form>
+
+    <!-- Enlace de regreso al mapa público -->
+    <a href="/" class="back-link">
+        <i class="bi bi-arrow-left me-1"></i> Volver al mapa
+    </a>
+
+</div>
+
+</body>
+</html>

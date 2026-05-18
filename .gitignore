@@ -1,0 +1,70 @@
+# ================================================================
+# .gitignore — NavGeo · Proyecto de Grado
+#
+# Este archivo le indica a Git qué archivos NO debe rastrear ni
+# subir al repositorio. Es fundamental para:
+#  1. Proteger credenciales y secretos (contraseñas de BD, API keys).
+#  2. Excluir archivos de configuración personal del IDE.
+#  3. Evitar subir archivos compilados que se pueden regenerar.
+# ================================================================
+
+# ----------------------------------------------------------------
+# ⚠️  SEGURIDAD CRÍTICA
+# Estos archivos pueden contener credenciales reales. NUNCA deben
+# subirse a GitHub, ni siquiera en repositorios privados.
+# ----------------------------------------------------------------
+application-prod.properties
+application-local.properties
+*.env
+secrets.properties
+
+# ----------------------------------------------------------------
+# ARCHIVOS COMPILADOS / BUILD
+# La carpeta target/ contiene el resultado de compilar el proyecto.
+# Se regenera con `mvn clean package`, por lo que no necesita
+# ser versionada.
+# ----------------------------------------------------------------
+target/
+*.class
+*.jar
+*.war
+
+# ----------------------------------------------------------------
+# INTELLIJ IDEA
+# IntelliJ genera archivos de configuración del espacio de trabajo
+# (.iml, .idea/) que son específicos de la máquina del desarrollador.
+# Otro desarrollador los regenera automáticamente al importar el pom.xml.
+# ----------------------------------------------------------------
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# ----------------------------------------------------------------
+# MAVEN
+# ----------------------------------------------------------------
+.mvn/wrapper/maven-wrapper.jar
+
+# ----------------------------------------------------------------
+# SISTEMA OPERATIVO
+# ----------------------------------------------------------------
+.DS_Store          # macOS: metadatos de carpetas
+Thumbs.db          # Windows: caché de miniaturas
+desktop.ini        # Windows: personalización de carpetas
+
+# ----------------------------------------------------------------
+# LOGS Y ARCHIVOS TEMPORALES
+# ----------------------------------------------------------------
+*.log
+logs/
+*.tmp
+*.bak
+*.swp
+
+# ----------------------------------------------------------------
+# VARIABLES DE ENTORNO (si usas archivos .env en el futuro)
+# ----------------------------------------------------------------
+.env
+.env.local
+.env.production
