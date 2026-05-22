@@ -36,18 +36,84 @@ public class AdminController {
     /**
      * GET /admin/dashboard
      * Muestra el panel principal del administrador con estadísticas básicas.
-     * Aquí se expanden las funcionalidades de gestión de rutas y paraderos.
      */
     @GetMapping({"/", "/dashboard"})
     public String dashboard(
             @AuthenticationPrincipal UserDetails userDetails,
             Model model) {
 
-        // Estadísticas básicas para el panel
-        model.addAttribute("totalRutas",    rutaRepository.count());
+        model.addAttribute("totalRutas",     rutaRepository.count());
         model.addAttribute("totalParaderos", paraderoRepository.count());
-        model.addAttribute("adminNombre",   userDetails.getUsername());
+        model.addAttribute("adminNombre",    userDetails.getUsername());
 
-        return "admin/dashboard"; // → templates/admin/dashboard.html
+        return "admin/dashboard";
+    }
+
+    /**
+     * GET /admin/rutas
+     * Formulario para registrar nuevas rutas (latitud, longitud, sentido).
+     * El POST de persistencia aún no está implementado.
+     */
+    @GetMapping("/rutas")
+    public String registrarRutas(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model) {
+
+        model.addAttribute("adminNombre", userDetails.getUsername());
+        return "admin/rutas";
+    }
+
+    /**
+     * GET /admin/paraderos
+     * Formulario para registrar nuevos paraderos.
+     */
+    @GetMapping("/paraderos")
+    public String registrarParaderos(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model) {
+
+        model.addAttribute("adminNombre", userDetails.getUsername());
+        return "admin/paraderos";
+    }
+
+    /**
+     * GET /admin/eliminar
+     * Vista para eliminar rutas o paraderos.
+     */
+    @GetMapping("/eliminar")
+    public String eliminar(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model) {
+
+        model.addAttribute("adminNombre", userDetails.getUsername());
+        return "admin/eliminar";
+    }
+
+    /**
+     * GET /admin/estadisticas
+     * Consulta de estadísticas del sistema.
+     */
+    @GetMapping("/estadisticas")
+    public String estadisticas(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model) {
+
+        model.addAttribute("adminNombre",    userDetails.getUsername());
+        model.addAttribute("totalRutas",     rutaRepository.count());
+        model.addAttribute("totalParaderos", paraderoRepository.count());
+        return "admin/estadisticas";
+    }
+
+    /**
+     * GET /admin/editar
+     * Vista para editar rutas o paraderos existentes.
+     */
+    @GetMapping("/editar")
+    public String editar(
+            @AuthenticationPrincipal UserDetails userDetails,
+            Model model) {
+
+        model.addAttribute("adminNombre", userDetails.getUsername());
+        return "admin/editar";
     }
 }
