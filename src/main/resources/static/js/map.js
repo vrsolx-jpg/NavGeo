@@ -7,22 +7,10 @@ let sentidoActual = "ida";
 const CENTRO_NEIVA = { lat: 2.9273, lng: -75.2819 };
 
 function initMap() {
-    const estiloMapa = [
-        { elementType: "geometry", stylers: [{ color: "#1a2035" }] },
-        { elementType: "labels.text.fill", stylers: [{ color: "#8ec3b9" }] },
-        { elementType: "labels.text.stroke", stylers: [{ color: "#1a3646" }] },
-        { featureType: "road", elementType: "geometry", stylers: [{ color: "#2c3e6b" }] },
-        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#1a2035" }] },
-        { featureType: "water", elementType: "geometry", stylers: [{ color: "#0e1626" }] },
-        { featureType: "poi", elementType: "geometry", stylers: [{ color: "#263356" }] },
-        { featureType: "transit", elementType: "geometry", stylers: [{ color: "#2f3948" }] },
-        { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#4b6878" }] }
-    ];
-
     map = new google.maps.Map(document.getElementById("map"), {
         center: CENTRO_NEIVA,
         zoom: 13,
-        styles: estiloMapa,
+        mapTypeId: "roadmap",
         mapTypeControl: false,
         streetViewControl: false,
         fullscreenControl: false,
