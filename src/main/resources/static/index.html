@@ -2,10 +2,99 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=/">
-    <title>NavGeo</title>
+    <meta name="viewport" content="width=1280">
+    <title>NavGeo — Rutas de Transporte Público · Neiva, Huila</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
-<body>
-    <a href="/">Ir al mapa publico de NavGeo</a>
+<body class="page-public">
+
+<!-- HEADER PÚBLICO: barra blanca con logo + nav -->
+<header class="public-header">
+    <div class="public-header__brand">
+        <img src="/css/images/LOGO.png" alt="Logo NavGeo">
+        <span class="public-header__brand-name">NAVGEO</span>
+    </div>
+    <nav class="public-header__nav">
+        <a href="/index.html" class="active">Inicio</a>
+        <a href="/nosotros.html">Nosotros</a>
+        <a href="/login">Administración</a>
+    </nav>
+</header>
+
+<!-- HERO: paisaje de Neiva con título centrado -->
+<section class="hero">
+    <h1 class="hero__title">CONOCE NUESTRAS RUTAS Y PARADEROS</h1>
+    <p class="hero__subtitle">Transporte Público NEIVA</p>
+
+    <!-- Olas decorativas blancas en la parte inferior del hero (dos capas para relieve) -->
+    <div class="wave-bottom" aria-hidden="true">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,60 C240,120 480,0 720,60 C960,120 1200,0 1440,60 L1440,120 L0,120 Z"
+                  fill="rgba(255,255,255,0.45)"></path>
+            <path d="M0,80 C240,140 480,20 720,80 C960,140 1200,20 1440,80 L1440,120 L0,120 Z"
+                  fill="#FFFFFF"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- CUERPO: 2 columnas (texto + imagen estática del mapa) -->
+<section class="explore-section">
+    <div class="explore-section__text">
+        <h2 class="explore-section__title">Explora las rutas disponibles &rarr;</h2>
+        <p class="explore-section__paragraph">
+            NavGeo es la plataforma oficial de visualización de rutas y paraderos
+            del Sistema Estratégico de Transporte Público de Neiva. Consulta
+            trayectos en tiempo real, descubre paraderos cercanos y planea tus
+            recorridos diarios con información precisa y actualizada.
+        </p>
+        <!--
+            IMPORTANTE: este botón redirige al MAPA REAL con Google Maps API
+            (templates/index.html, ruta "/"). NO es una imagen estática.
+        -->
+        <a href="/" class="btn-empezar">EMPEZAR</a>
+    </div>
+
+    <div class="explore-section__map">
+        <!--
+            Imagen estática ilustrativa del mapa. NO ES la API de Google Maps;
+            es solo un preview del mockup. El mapa real funcional vive en "/"
+            y se carga al pulsar EMPEZAR.
+        -->
+        <img src="/css/images/neiva%20mapa.png"
+             alt="Vista previa del mapa de rutas de Neiva">
+    </div>
+</section>
+
+<!-- FOOTER: 3 columnas (sin ola decorativa, borde superior recto) -->
+<footer class="public-footer">
+    <div class="public-footer__grid">
+        <div class="public-footer__brand">
+            <img src="/css/images/LOGO.png" alt="Logo NavGeo">
+            <span class="public-footer__brand-name">NAVGEO</span>
+        </div>
+
+        <div class="public-footer__contact">
+            <h3 class="public-footer__heading">Contactanos</h3>
+            <p><i class="bi bi-envelope-fill me-2"></i>contacto@navgeo.co</p>
+            <p><i class="bi bi-telephone-fill me-2"></i>+57 (608) 871 0000</p>
+            <p><i class="bi bi-geo-alt-fill me-2"></i>Neiva, Huila — Colombia</p>
+        </div>
+
+        <div class="public-footer__social">
+            <h3 class="public-footer__heading">Siguenos</h3>
+            <div class="public-footer__social-icons">
+                <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" aria-label="X (antes Twitter)"><i class="bi bi-twitter-x"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
 </body>
 </html>
