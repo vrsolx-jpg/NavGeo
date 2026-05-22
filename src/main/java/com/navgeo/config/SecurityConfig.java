@@ -96,7 +96,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
 
                 // RECURSOS ESTÁTICOS: siempre públicos.
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/fonts/**").permitAll()
 
                 // API PÚBLICA: consulta de rutas y paraderos para el mapa.
                 // Cualquier visitante (sin login) puede obtener este JSON.
