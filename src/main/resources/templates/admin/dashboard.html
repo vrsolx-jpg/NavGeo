@@ -20,7 +20,7 @@
 -->
 <header class="admin-header">
     <div class="admin-header__brand">
-        <img th:src="@{/css/images/LOGO.png}" src="/css/images/LOGO.png" alt="Logo NavGeo">
+        <img th:src="@{/css/images/LOGO.png}" src="/css/images/LOGO.png" alt="" aria-hidden="true">
         <div class="admin-header__brand-text">
             <span class="admin-header__brand-name">NAVGEO</span>
             <span class="admin-header__welcome">
@@ -45,9 +45,10 @@
 
     <a th:href="@{/admin/rutas}"        href="/admin/rutas"        class="admin-action-btn">REGISTRA RUTAS</a>
     <a th:href="@{/admin/paraderos}"    href="/admin/paraderos"    class="admin-action-btn">REGISTRA PARADEROS</a>
-    <a th:href="@{/admin/eliminar}"     href="/admin/eliminar"     class="admin-action-btn">ELIMINA</a>
-    <a th:href="@{/admin/estadisticas}" href="/admin/estadisticas" class="admin-action-btn">CONSULTA ESTADISTICAS</a>
     <a th:href="@{/admin/editar}"       href="/admin/editar"       class="admin-action-btn">EDITA</a>
+    <a th:if="${esAdmin}" th:href="@{/admin/eliminar}"     href="/admin/eliminar"     class="admin-action-btn">ELIMINA</a>
+    <a th:if="${esAdmin}" th:href="@{/admin/estadisticas}" href="/admin/estadisticas" class="admin-action-btn">CONSULTA ESTADISTICAS</a>
+    <a th:if="${esAdmin}" th:href="@{/admin/editores}"     href="/admin/editores"     class="admin-action-btn">AGREGAR EDITOR</a>
 
 </main>
 
@@ -59,5 +60,6 @@
     </svg>
 </div>
 
+<script src="/js/preferences.js"></script>
 </body>
 </html>

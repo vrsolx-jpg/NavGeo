@@ -12,9 +12,10 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}" href="/css/styles.css">
 </head>
 <body class="page-login">
+<main class="login-main" aria-labelledby="login-title">
 
 <!-- Título grande EXTERIOR a la card (según mockup) -->
-<h1 class="login-panel-title">Admin Panel</h1>
+<h1 class="login-panel-title" id="login-title">Admin Panel</h1>
 
 <!-- Mensajes Spring (errorMsg / logoutMsg) -->
 <div class="login-alert alert-error" th:if="${errorMsg}">
@@ -63,6 +64,17 @@
         <button type="submit" class="btn-login-submit">Siguiente</button>
     </form>
 
+    <div class="login-divider">
+        <span>o</span>
+    </div>
+
+    <a th:href="@{/oauth2/authorization/google}"
+       href="/oauth2/authorization/google"
+       class="btn-login-google">
+        <i class="bi bi-google"></i>
+        Continuar con Google
+    </a>
+
 </div>
 
 <!-- Botón "Atrás" debajo de la card -->
@@ -70,5 +82,8 @@
     <i class="bi bi-arrow-left"></i> Atrás
 </a>
 
+</main>
+
+<script src="/js/preferences.js"></script>
 </body>
 </html>

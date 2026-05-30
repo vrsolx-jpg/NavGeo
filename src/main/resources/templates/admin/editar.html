@@ -4,18 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1280">
     <title>NavGeo — Edita</title>
-
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" th:href="@{/css/styles.css}" href="/css/styles.css">
+
+    <style>
+        #mapa-editar {
+            width: 100%;
+            height: 420px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.15);
+            margin-bottom: 16px;
+        }
+        .seccion-mapa {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .seccion-valor {
+            display: block;
+        }
+        .sentido-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        .sentido-tab {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.55);
+            background: rgba(255,255,255,0.12);
+            color: #FFFFFF;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .sentido-tab.active {
+            border-color: #6366F1;
+            background: rgba(99,102,241,0.2);
+            color: #fff;
+        }
+        .btn-trazado {
+            padding: 8px 18px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .resumen-puntos {
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.45);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: #FFFFFF;
+            margin-bottom: 16px;
+            min-height: 40px;
+        }
+        .color-preview {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 2px solid rgba(255,255,255,0.3);
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+    </style>
 </head>
 <body class="page-admin">
 
 <header class="admin-header">
     <div class="admin-header__brand">
-        <img th:src="@{/css/images/LOGO.png}" src="/css/images/LOGO.png" alt="Logo NavGeo">
+        <img th:src="@{/css/images/LOGO.png}" src="/css/images/LOGO.png" alt="" aria-hidden="true">
         <div class="admin-header__brand-text">
             <span class="admin-header__brand-name">NAVGEO</span>
             <span class="admin-header__welcome">
@@ -23,7 +91,6 @@
             </span>
         </div>
     </div>
-
     <div class="admin-header__actions">
         <a th:href="@{/logout}" href="/logout" class="admin-logout-btn">Cerrar Sesión</a>
         <a th:href="@{/admin/dashboard}" href="/admin/dashboard" class="admin-back-btn">Atrás</a>
@@ -34,55 +101,769 @@
 
     <div class="admin-form-title-btn">EDITA</div>
 
-    <div class="admin-card">
-        <h2 class="admin-card__heading">Por favor llena la siguiente informacion</h2>
+    <div class="admin-card" style="max-width:860px;">
+        <h2 class="admin-card__heading">Por favor llena la siguiente información</h2>
 
-        <form method="post" th:action="@{/admin/editar}"
-              onsubmit="event.preventDefault(); alert('Endpoint POST aún no implementado en el backend.');">
-
-            <div class="admin-form-label-group">
-                <span class="admin-form-label">¿Qué deseas editar?</span>
-
-                <div class="admin-option-row">
-                    <input type="radio" id="edit-ruta" name="tipo" value="ruta">
-                    <label for="edit-ruta">Ruta</label>
-                </div>
-
-                <div class="admin-option-row">
-                    <input type="radio" id="edit-paradero" name="tipo" value="paradero">
-                    <label for="edit-paradero">Paradero</label>
-                </div>
+        <!-- Tipo -->
+        <div class="admin-form-label-group">
+            <span class="admin-form-label">¿Qué deseas editar?</span>
+            <div class="admin-option-row">
+                <input type="radio" id="edit-ruta" name="tipo"
+                       value="ruta" checked onchange="actualizarOpciones()">
+                <label for="edit-ruta">Ruta</label>
             </div>
+            <div class="admin-option-row">
+                <input type="radio" id="edit-paradero" name="tipo"
+                       value="paradero" onchange="actualizarOpciones()">
+                <label for="edit-paradero">Paradero</label>
+            </div>
+            <div class="admin-option-row" th:if="${esAdmin}">
+                <input type="radio" id="edit-empleado" name="tipo"
+                       value="empleado" onchange="actualizarOpciones()">
+                <label for="edit-empleado">Empleado</label>
+            </div>
+        </div>
 
+        <div id="seccion-edicion-general">
+        <!-- ID -->
+        <div class="form-group">
+            <label for="edit-id" class="form-label">ID del elemento</label>
+            <input type="number" id="edit-id" class="form-control"
+                   min="0" step="1" inputmode="numeric" pattern="[0-9]*"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                   placeholder="Ej: 1" autocomplete="off"
+                   onchange="cargarTrazadoActual()" onblur="cargarTrazadoActual()">
+        </div>
+
+        <!-- Campo a editar -->
+        <div class="form-group">
+            <label for="edit-campo" class="form-label">Campo a editar</label>
+            <select id="edit-campo" class="form-control"
+                    onchange="manejarCampoSeleccionado()">
+                <!-- Se llena dinámicamente por actualizarOpciones() -->
+            </select>
+        </div>
+
+        <!-- Nuevo valor (texto) -->
+        <div class="form-group seccion-valor" id="seccion-valor-texto">
+            <label for="edit-valor" class="form-label">Nuevo valor</label>
+            <input type="text" id="edit-valor" class="form-control"
+                   placeholder="Ingresa el nuevo valor" autocomplete="off">
+        </div>
+
+        <!-- Nuevo valor (color) -->
+        <div class="form-group" id="seccion-valor-color" style="display:none;">
+            <label class="form-label">
+                Nuevo color
+                <span class="color-preview" id="edit-color-preview"
+                      style="background:#E53935;"></span>
+            </label>
+            <input type="color"
+                   id="edit-color-input"
+                   value="#E53935"
+                   onchange="actualizarPreviewColor(this.value)"
+                   style="width:60px;height:40px;border:none;
+                          border-radius:8px;cursor:pointer;padding:0;">
+            <span id="edit-color-label"
+                  style="font-size:14px;color:#FFFFFF;
+                         margin-left:10px;">#E53935</span>
+        </div>
+
+        <button type="button" class="btn-subir" onclick="editarElemento()">
+            <i class="bi bi-pencil-fill me-1"></i> Guardar cambios
+        </button>
+        </div>
+
+        <div id="seccion-editar-empleado" style="display:none;">
             <div class="form-group">
-                <label for="identificador" class="form-label">ID del elemento</label>
-                <input type="text" id="identificador" name="identificador" class="form-control"
-                       placeholder="Ej: 1" autocomplete="off">
+                <label for="edit-empleado-id" class="form-label">ID del empleado</label>
+                <input type="number" id="edit-empleado-id" class="form-control"
+                       min="0" step="1" inputmode="numeric" pattern="[0-9]*"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                       placeholder="Ej: 2" autocomplete="off">
             </div>
-
             <div class="form-group">
-                <label for="nuevo-valor" class="form-label">Nuevo valor</label>
-                <input type="text" id="nuevo-valor" name="nuevoValor" class="form-control"
-                       placeholder="Ingresa el nuevo valor" autocomplete="off">
+                <label for="edit-empleado-nombre" class="form-label">Nombre</label>
+                <input type="text" id="edit-empleado-nombre" class="form-control"
+                       placeholder="Nuevo nombre" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="edit-empleado-email" class="form-label">Correo</label>
+                <input type="email" id="edit-empleado-email" class="form-control"
+                       placeholder="nuevo.correo@navgeo.co" autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="edit-empleado-password" class="form-label">Contraseña</label>
+                <input type="password" id="edit-empleado-password" class="form-control"
+                       placeholder="Nueva contraseña" autocomplete="new-password">
+            </div>
+            <button type="button" class="btn-subir" onclick="editarEmpleado()">
+                <i class="bi bi-pencil-fill me-1"></i> Guardar empleado
+            </button>
+        </div>
+
+        <div id="msg-editar"
+             style="margin-top:12px;font-size:13px;
+                    display:none;padding:10px;border-radius:8px;"></div>
+
+        <!-- ── Sección mapa (solo visible cuando se elige "ubicacion") ── -->
+        <div class="seccion-mapa" id="seccion-mapa">
+
+            <h3 style="font-size:15px;font-weight:700;margin-bottom:16px;">
+                <i class="bi bi-map me-1"></i>
+                <span id="titulo-mapa">Editar trazado en el mapa</span>
+            </h3>
+
+            <!-- Tabs de sentido (solo para rutas) -->
+            <div id="seccion-sentido">
+                <label class="form-label">Sentido del trazado</label>
+                <div class="sentido-tabs">
+                    <button type="button" class="sentido-tab active"
+                            id="edit-tab-ida" onclick="editarSentido('ida')">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Ida
+                    </button>
+                    <button type="button" class="sentido-tab"
+                            id="edit-tab-vuelta" onclick="editarSentido('vuelta')">
+                        <i class="bi bi-arrow-left-circle me-1"></i> Vuelta
+                    </button>
+                </div>
             </div>
 
-            <button type="submit" class="btn-subir">Subir</button>
+            <!-- Buscador -->
+            <div style="margin-bottom:10px;">
+                <label for="buscador-editar" class="sr-only">Buscar lugar en el mapa</label>
+                <input id="buscador-editar" type="text" class="form-control"
+                       aria-label="Buscar lugar en el mapa"
+                       placeholder="Buscar lugar en el mapa..."
+                       autocomplete="off">
+            </div>
 
-            <p class="admin-card__notice">
-                Los cambios se aplican de inmediato. Verifica el identificador antes
-                de enviar.
-            </p>
-        </form>
+            <!-- Controles trazado (solo para rutas) -->
+            <div id="controles-trazado"
+                 style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                <button type="button" class="btn-trazado"
+                        style="background:#8dae45;color:#fff;"
+                        onclick="editDeshacerPunto()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Deshacer
+                </button>
+                <button type="button" class="btn-trazado"
+                        style="background:#233005;color:#fff;"
+                        onclick="editLimpiarTrazado()">
+                    <i class="bi bi-trash me-1"></i> Limpiar
+                </button>
+                <span class="btn-trazado"
+                      style="background:rgba(255,255,255,0.18);color:#fff;
+                             border:1px solid rgba(255,255,255,0.55);cursor:default;">
+                    <i class="bi bi-info-circle me-1"></i> Clic = agregar punto
+                </span>
+            </div>
+
+            <div id="mapa-editar"></div>
+
+            <!-- Contador (solo rutas) -->
+            <div id="seccion-contador"
+                 style="font-size:14px;color:#FFFFFF;margin-bottom:8px;">
+                Puntos: <strong id="edit-contador">0</strong>
+            </div>
+
+            <!-- Resumen (solo rutas) -->
+            <div class="resumen-puntos" id="edit-resumen">
+                Haz clic en el mapa para trazar el nuevo recorrido.
+            </div>
+
+            <!-- Coordenadas paradero -->
+            <div id="seccion-coords-paradero"
+                 style="display:none;background:rgba(255,255,255,0.12);
+                        border:1px solid rgba(255,255,255,0.45);border-radius:8px;
+                        padding:10px 14px;font-size:14px;color:#FFFFFF;
+                        margin-bottom:16px;">
+                Haz clic en el mapa para seleccionar la nueva ubicación del paradero.
+            </div>
+
+            <input type="hidden" id="edit-lat-paradero">
+            <input type="hidden" id="edit-lng-paradero">
+
+            <button type="button" class="btn-subir"
+                    id="btn-guardar-mapa"
+                    onclick="guardarCambioMapa()">
+                <span id="label-btn-mapa">Guardar cambio en el mapa</span>
+            </button>
+
+            <div id="msg-trazado"
+                 style="margin-top:12px;font-size:13px;
+                        display:none;padding:10px;border-radius:8px;"></div>
+        </div>
+
+        <p class="admin-card__notice">
+            Los cambios se aplican de inmediato. Verifica el ID antes de enviar.
+        </p>
     </div>
 
 </main>
 
 <div class="admin-wave-footer" aria-hidden="true">
-    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none"
+         xmlns="http://www.w3.org/2000/svg">
         <path d="M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z"
               fill="#FFFFFF"></path>
     </svg>
 </div>
 
+<script>
+    // ── Variables del mapa ────────────────────────────────────────────
+    let mapEditar;
+    let polylineEditar;
+    let puntosEditar     = [];
+    let marcadoresEdit   = [];
+    let sentidoEditar    = 'ida';
+    let mapaInicializado = false;
+    let marcadorParaderoEdit = null;
+    let tokenCargaTrazado = 0;
+
+    // ── Opciones por tipo ─────────────────────────────────────────────
+    const OPCIONES = {
+        ruta: [
+            { value: 'nombre',      label: 'Nombre' },
+            { value: 'descripcion', label: 'Descripción' },
+            { value: 'color',       label: 'Color' },
+            { value: 'ubicacion',   label: 'Trazado en el mapa' }
+        ],
+        paradero: [
+            { value: 'nombre',    label: 'Nombre' },
+            { value: 'color',     label: 'Color' },
+            { value: 'ubicacion', label: 'Ubicación en el mapa' }
+        ],
+        empleado: []
+    };
+
+    // ── Actualiza el select de campos según el tipo seleccionado ──────
+    function actualizarOpciones() {
+        const tipo    = document.querySelector('input[name="tipo"]:checked').value;
+        const select  = document.getElementById('edit-campo');
+        const seccionGeneral = document.getElementById('seccion-edicion-general');
+        const seccionEmpleado = document.getElementById('seccion-editar-empleado');
+
+        if (tipo === 'empleado') {
+            seccionGeneral.style.display = 'none';
+            seccionEmpleado.style.display = 'block';
+            document.getElementById('seccion-mapa').style.display = 'none';
+            return;
+        }
+
+        seccionGeneral.style.display = 'block';
+        seccionEmpleado.style.display = 'none';
+        select.innerHTML = '';
+
+        OPCIONES[tipo].forEach(op => {
+            const opt   = document.createElement('option');
+            opt.value   = op.value;
+            opt.textContent = op.label;
+            select.appendChild(opt);
+        });
+
+        // Dispara la lógica de visibilidad
+        manejarCampoSeleccionado();
+    }
+
+    // ── Controla qué secciones mostrar según el campo elegido ─────────
+    function manejarCampoSeleccionado() {
+        const campo = document.getElementById('edit-campo').value;
+        const tipo  = document.querySelector('input[name="tipo"]:checked').value;
+
+        const seccionTexto  = document.getElementById('seccion-valor-texto');
+        const seccionColor  = document.getElementById('seccion-valor-color');
+        const seccionMapa   = document.getElementById('seccion-mapa');
+        const seccionSentido= document.getElementById('seccion-sentido');
+        const controles     = document.getElementById('controles-trazado');
+        const seccionCount  = document.getElementById('seccion-contador');
+        const resumen       = document.getElementById('edit-resumen');
+        const coordsParad   = document.getElementById('seccion-coords-paradero');
+        const tituloMapa    = document.getElementById('titulo-mapa');
+        const labelBtn      = document.getElementById('label-btn-mapa');
+
+        // Oculta todo primero
+        seccionTexto.style.display = 'none';
+        seccionColor.style.display = 'none';
+        seccionMapa.style.display  = 'none';
+
+        if (campo === 'color') {
+            seccionColor.style.display = 'block';
+
+        } else if (campo === 'ubicacion') {
+            seccionMapa.style.display = 'block';
+
+            if (tipo === 'ruta') {
+                // Configuración para trazado de ruta
+                seccionSentido.style.display = 'block';
+                controles.style.display      = 'flex';
+                seccionCount.style.display   = 'block';
+                resumen.style.display        = 'block';
+                coordsParad.style.display    = 'none';
+                tituloMapa.textContent       = 'Editar trazado de la ruta en el mapa';
+                labelBtn.textContent         = 'Guardar nuevo trazado';
+            } else {
+                // Configuración para ubicación de paradero
+                seccionSentido.style.display = 'none';
+                controles.style.display      = 'none';
+                seccionCount.style.display   = 'none';
+                resumen.style.display        = 'none';
+                coordsParad.style.display    = 'block';
+                tituloMapa.textContent       = 'Editar ubicación del paradero en el mapa';
+                labelBtn.textContent         = 'Guardar nueva ubicación';
+            }
+
+            // Inicializa el mapa la primera vez
+            if (!mapaInicializado) {
+                setTimeout(inicializarMapaEditar, 100);
+            }
+            if (tipo === 'ruta') {
+                setTimeout(cargarTrazadoActual, 150);
+            }
+
+        } else {
+            // nombre o descripcion → campo de texto
+            seccionTexto.style.display = 'block';
+        }
+    }
+
+    // ── Actualiza el preview del color ───────────────────────────────
+    function actualizarPreviewColor(color) {
+        document.getElementById('edit-color-preview').style.background = color;
+        document.getElementById('edit-color-label').textContent        = color;
+    }
+
+    // ── Inicializa el mapa ────────────────────────────────────────────
+    function inicializarMapaEditar() {
+        if (mapaInicializado) return;
+        mapaInicializado = true;
+
+        const centroNeiva = { lat: 2.9273, lng: -75.2819 };
+
+        mapEditar = new google.maps.Map(document.getElementById('mapa-editar'), {
+            center:            centroNeiva,
+            zoom:              14,
+            mapTypeControl:    false,
+            streetViewControl: false,
+            fullscreenControl: false
+        });
+
+        polylineEditar = new google.maps.Polyline({
+            path:          puntosEditar,
+            geodesic:      true,
+            strokeColor:   '#6366F1',
+            strokeOpacity: 0.9,
+            strokeWeight:  5
+        });
+        polylineEditar.setMap(mapEditar);
+
+        mapEditar.addListener('click', (event) => {
+            const tipo  = document.querySelector('input[name="tipo"]:checked').value;
+            const campo = document.getElementById('edit-campo').value;
+
+            if (campo === 'ubicacion' && tipo === 'paradero') {
+                colocarMarcadorParadero(
+                    event.latLng.lat(), event.latLng.lng());
+            } else if (campo === 'ubicacion' && tipo === 'ruta') {
+                editAgregarPunto({
+                    lat: event.latLng.lat(),
+                    lng: event.latLng.lng()
+                });
+            }
+        });
+
+        // Buscador
+        const input = document.getElementById('buscador-editar');
+        if (input && google.maps.places) {
+            const ac = new google.maps.places.Autocomplete(input, {
+                componentRestrictions: { country: 'co' },
+                bounds: new google.maps.LatLngBounds(
+                    new google.maps.LatLng(2.85, -75.35),
+                    new google.maps.LatLng(3.00, -75.20)
+                )
+            });
+            ac.addListener('place_changed', () => {
+                const lugar = ac.getPlace();
+                if (!lugar.geometry) return;
+                mapEditar.setCenter(lugar.geometry.location);
+                mapEditar.setZoom(17);
+            });
+        }
+    }
+
+    // ── Marcador para paradero ────────────────────────────────────────
+    function colocarMarcadorParadero(lat, lng) {
+        if (marcadorParaderoEdit) marcadorParaderoEdit.setMap(null);
+
+        marcadorParaderoEdit = new google.maps.Marker({
+            position: { lat, lng },
+            map:      mapEditar,
+            icon: {
+                path:        google.maps.SymbolPath.CIRCLE,
+                scale:       10,
+                fillColor:   '#4F46E5',
+                fillOpacity: 1,
+                strokeColor: '#fff',
+                strokeWeight: 2
+            }
+        });
+
+        document.getElementById('edit-lat-paradero').value = lat;
+        document.getElementById('edit-lng-paradero').value = lng;
+        document.getElementById('seccion-coords-paradero').innerHTML =
+            `<strong>Nueva ubicación:</strong><br>
+         Latitud: ${lat.toFixed(7)}<br>
+         Longitud: ${lng.toFixed(7)}`;
+    }
+
+    // ── Funciones de trazado de ruta ──────────────────────────────────
+    function editAgregarPunto(punto) {
+        const puntoNormalizado = {
+            lat: Number(punto.lat),
+            lng: Number(punto.lng)
+        };
+        const indice = puntosEditar.length;
+        puntosEditar.push(puntoNormalizado);
+        polylineEditar.setPath(puntosEditar);
+        crearMarcadorTrazado(puntoNormalizado, indice);
+        editActualizarUI();
+    }
+
+    function crearMarcadorTrazado(punto, indice) {
+        const m = new google.maps.Marker({
+            position: punto,
+            map:      mapEditar,
+            draggable: true,
+            icon: {
+                path:        google.maps.SymbolPath.CIRCLE,
+                scale:       5,
+                fillColor:   '#6366F1',
+                fillOpacity: 1,
+                strokeColor: '#fff',
+                strokeWeight: 1.5
+            }
+        });
+        m.addListener('dragend', (event) => {
+            puntosEditar[indice] = {
+                lat: event.latLng.lat(),
+                lng: event.latLng.lng()
+            };
+            polylineEditar.setPath(puntosEditar);
+            editActualizarUI();
+        });
+        marcadoresEdit.push(m);
+    }
+
+    function editDeshacerPunto() {
+        if (puntosEditar.length === 0) return;
+        puntosEditar.pop();
+        polylineEditar.setPath(puntosEditar);
+        const u = marcadoresEdit.pop();
+        if (u) u.setMap(null);
+        editActualizarUI();
+    }
+
+    function editLimpiarTrazado() {
+        puntosEditar = [];
+        polylineEditar.setPath([]);
+        limpiarMarcadoresTrazado();
+        editActualizarUI();
+    }
+
+    function limpiarMarcadoresTrazado() {
+        marcadoresEdit.forEach(m => m.setMap(null));
+        marcadoresEdit = [];
+    }
+
+    function editarSentido(sentido) {
+        sentidoEditar = sentido;
+        document.getElementById('edit-tab-ida').classList
+            .toggle('active', sentido === 'ida');
+        document.getElementById('edit-tab-vuelta').classList
+            .toggle('active', sentido === 'vuelta');
+        cargarTrazadoActual();
+    }
+
+    async function cargarTrazadoActual() {
+        const tipo = document.querySelector('input[name="tipo"]:checked').value;
+        const campo = document.getElementById('edit-campo').value;
+        const id = document.getElementById('edit-id').value.trim();
+
+        if (tipo !== 'ruta' || campo !== 'ubicacion' || !id || !mapaInicializado || !polylineEditar) {
+            return;
+        }
+
+        const token = ++tokenCargaTrazado;
+        mostrarMsgTrazado('Cargando trazado actual...', 'info');
+
+        try {
+            const r = await fetch(`/api/rutas/${encodeURIComponent(id)}/coordenadas?sentido=${encodeURIComponent(sentidoEditar)}`);
+            if (token !== tokenCargaTrazado) return;
+
+            if (r.status === 404) {
+                editLimpiarTrazado();
+                mostrarMsgTrazado(`No se encontro la ruta con ID ${id}.`, 'error');
+                return;
+            }
+            if (!r.ok) {
+                mostrarMsgTrazado('No se pudo cargar el trazado actual.', 'error');
+                return;
+            }
+
+            const data = await r.json();
+            const coords = Array.isArray(data.coordenadas) ? data.coordenadas : [];
+            renderizarTrazadoEditar(coords, data.color);
+
+            if (coords.length === 0) {
+                mostrarMsgTrazado(`La ruta ${id} no tiene puntos guardados para ${sentidoEditar}.`, 'info');
+            } else {
+                mostrarMsgTrazado(`Trazado actual cargado: ${coords.length} puntos. Puedes arrastrar puntos o agregar nuevos.`, 'exito');
+            }
+        } catch (e) {
+            if (token === tokenCargaTrazado) {
+                mostrarMsgTrazado('Error de conexion al cargar el trazado.', 'error');
+            }
+        }
+    }
+
+    function renderizarTrazadoEditar(coordenadas, color) {
+        puntosEditar = coordenadas.map(p => ({
+            lat: Number(p.lat),
+            lng: Number(p.lng)
+        })).filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+
+        limpiarMarcadoresTrazado();
+        if (color) {
+            polylineEditar.setOptions({ strokeColor: color });
+        }
+        polylineEditar.setPath(puntosEditar);
+        puntosEditar.forEach((punto, indice) => crearMarcadorTrazado(punto, indice));
+        centrarTrazadoEditar();
+        editActualizarUI();
+    }
+
+    function centrarTrazadoEditar() {
+        if (puntosEditar.length === 0) return;
+        const bounds = new google.maps.LatLngBounds();
+        puntosEditar.forEach(p => bounds.extend(p));
+        mapEditar.fitBounds(bounds);
+        if (puntosEditar.length === 1) {
+            mapEditar.setZoom(17);
+        }
+    }
+
+    function editActualizarUI() {
+        document.getElementById('edit-contador').textContent = puntosEditar.length;
+        const r = document.getElementById('edit-resumen');
+        if (puntosEditar.length === 0) {
+            r.textContent = 'Haz clic en el mapa para trazar el nuevo recorrido.';
+            return;
+        }
+        const p = puntosEditar[0];
+        const u = puntosEditar[puntosEditar.length - 1];
+        r.innerHTML = `
+        <strong>Inicio:</strong> ${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}<br>
+        <strong>Fin:</strong> ${u.lat.toFixed(6)}, ${u.lng.toFixed(6)}<br>
+        <strong>Total:</strong> ${puntosEditar.length} puntos · sentido: ${sentidoEditar}
+    `;
+    }
+
+    // ── Guarda cambios de texto/color ─────────────────────────────────
+    async function editarElemento() {
+        const tipo  = document.querySelector('input[name="tipo"]:checked').value;
+        const id    = document.getElementById('edit-id').value.trim();
+        const campo = document.getElementById('edit-campo').value;
+
+        if (!id) { mostrarMsgEditar('Ingresa el ID del elemento.', 'error'); return; }
+        if (campo === 'ubicacion') {
+            mostrarMsgEditar('Para editar la ubicación usa el botón del mapa.', 'info');
+            return;
+        }
+
+        let valor;
+        if (campo === 'color') {
+            valor = document.getElementById('edit-color-input').value;
+        } else {
+            valor = document.getElementById('edit-valor').value.trim();
+        }
+
+        if (!valor) { mostrarMsgEditar('Ingresa el nuevo valor.', 'error'); return; }
+
+        const url  = tipo === 'ruta'
+            ? `/admin/api/rutas/${id}`
+            : `/admin/api/paraderos/${id}`;
+
+        const body = {};
+        body[campo] = valor;
+
+        mostrarMsgEditar('Guardando...', 'info');
+
+        try {
+            const r = await fetch(url, {
+                method:  'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(body)
+            });
+
+            if (r.ok) {
+                const data = await r.json();
+                mostrarMsgEditar(`✅ ${data.mensaje}`, 'exito');
+            } else if (r.status === 404) {
+                mostrarMsgEditar(`No se encontró el elemento con ID ${id}.`, 'error');
+            } else {
+                mostrarMsgEditar('Error al actualizar.', 'error');
+            }
+        } catch (e) {
+            mostrarMsgEditar('Error de conexión.', 'error');
+        }
+    }
+
+    // ── Guarda el cambio desde el mapa (trazado o ubicación) ──────────
+    async function editarEmpleado() {
+        const id = document.getElementById('edit-empleado-id').value.trim();
+        const nombre = document.getElementById('edit-empleado-nombre').value.trim();
+        const email = document.getElementById('edit-empleado-email').value.trim();
+        const password = document.getElementById('edit-empleado-password').value;
+
+        if (!id) {
+            mostrarMsgEditar('Ingresa el ID del empleado.', 'error');
+            return;
+        }
+
+        const body = {};
+        if (nombre) body.nombre = nombre;
+        if (email) body.email = email;
+        if (password) body.password = password;
+
+        if (Object.keys(body).length === 0) {
+            mostrarMsgEditar('Ingresa al menos un dato para actualizar.', 'error');
+            return;
+        }
+
+        mostrarMsgEditar('Guardando empleado...', 'info');
+
+        try {
+            const r = await fetch(`/admin/api/editores/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (r.ok) {
+                const data = await r.json();
+                mostrarMsgEditar(`✅ ${data.mensaje}`, 'exito');
+                document.getElementById('edit-empleado-nombre').value = '';
+                document.getElementById('edit-empleado-email').value = '';
+                document.getElementById('edit-empleado-password').value = '';
+            } else if (r.status === 404) {
+                mostrarMsgEditar(`No se encontró el empleado editor con ID ${id}.`, 'error');
+            } else {
+                mostrarMsgEditar('Error al actualizar empleado.', 'error');
+            }
+        } catch (e) {
+            mostrarMsgEditar('Error de conexión.', 'error');
+        }
+    }
+
+    async function guardarCambioMapa() {
+        const tipo = document.querySelector('input[name="tipo"]:checked').value;
+        const id   = document.getElementById('edit-id').value.trim();
+
+        if (!id) {
+            mostrarMsgTrazado('Ingresa el ID del elemento arriba.', 'error');
+            return;
+        }
+
+        if (tipo === 'ruta') {
+            // Guardar trazado
+            if (puntosEditar.length < 2) {
+                mostrarMsgTrazado('Traza al menos 2 puntos.', 'error');
+                return;
+            }
+            mostrarMsgTrazado('Guardando trazado...', 'info');
+            try {
+                const r = await fetch(`/admin/api/rutas/${id}/coordenadas`, {
+                    method:  'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({
+                        sentido:     sentidoEditar,
+                        coordenadas: puntosEditar.map(p => ({ lat: p.lat, lng: p.lng }))
+                    })
+                });
+                if (r.ok) {
+                    mostrarMsgTrazado(
+                        `✅ Trazado actualizado con ${puntosEditar.length} puntos.`,
+                        'exito');
+                } else if (r.status === 404) {
+                    mostrarMsgTrazado(`No se encontró la ruta con ID ${id}.`, 'error');
+                } else {
+                    mostrarMsgTrazado('Error al guardar.', 'error');
+                }
+            } catch (e) {
+                mostrarMsgTrazado('Error de conexión.', 'error');
+            }
+
+        } else {
+            // Guardar nueva ubicación de paradero
+            const lat = document.getElementById('edit-lat-paradero').value;
+            const lng = document.getElementById('edit-lng-paradero').value;
+
+            if (!lat || !lng) {
+                mostrarMsgTrazado('Haz clic en el mapa para seleccionar la ubicación.', 'error');
+                return;
+            }
+            mostrarMsgTrazado('Guardando ubicación...', 'info');
+            try {
+                const r = await fetch(`/admin/api/paraderos/${id}`, {
+                    method:  'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify({ latitud: lat, longitud: lng })
+                });
+                if (r.ok) {
+                    mostrarMsgTrazado('✅ Ubicación del paradero actualizada.', 'exito');
+                } else if (r.status === 404) {
+                    mostrarMsgTrazado(`No se encontró el paradero con ID ${id}.`, 'error');
+                } else {
+                    mostrarMsgTrazado( 'Error al guardar.', 'error');
+                }
+            } catch (e) {
+                mostrarMsgTrazado('Error de conexión.', 'error');
+            }
+        }
+    }
+
+    // ── Mensajes ──────────────────────────────────────────────────────
+    function mostrarMsgEditar(texto, tipo) {
+        const el = document.getElementById('msg-editar');
+        el.style.display = 'block';
+        el.textContent   = texto;
+        aplicarEstilo(el, tipo);
+    }
+
+    function mostrarMsgTrazado(texto, tipo) {
+        const el = document.getElementById('msg-trazado');
+        el.style.display = 'block';
+        el.textContent   = texto;
+        aplicarEstilo(el, tipo);
+    }
+
+    function aplicarEstilo(el, tipo) {
+        const estilos = {
+            exito: 'background:rgba(16,185,129,0.15);color:#6EE7B7;border:1px solid rgba(16,185,129,0.3)',
+            error: 'background:rgba(239,68,68,0.15);color:#FCA5A5;border:1px solid rgba(239,68,68,0.3)',
+            info:  'background:rgba(99,102,241,0.15);color:#C7D2FE;border:1px solid rgba(99,102,241,0.3)'
+        };
+        el.style.cssText += '; ' + (estilos[tipo] || estilos.info);
+    }
+
+    // Inicializa las opciones al cargar
+    window.addEventListener('load', actualizarOpciones);
+</script>
+
+<script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQioA2hGEBbcoB9I98gjwL8fF-Uv8QhME&libraries=places&callback=Function.prototype&loading=async"
+        async defer>
+</script>
+
+<script src="/js/preferences.js"></script>
 </body>
 </html>
