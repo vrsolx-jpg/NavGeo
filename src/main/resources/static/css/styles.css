@@ -66,6 +66,21 @@
     --topbar-height:         44px;
 }
 
+body.theme-colorblind {
+    --color-bg:              #233B53;
+    --color-surface:         #31506B;
+    --color-surface-input:   #1F344A;
+    --color-border:          rgba(255, 255, 255, 0.42);
+    --color-muted:           rgba(255, 255, 255, 0.82);
+    --color-accent:          #0072B2;
+    --color-accent-light:    #56B4E9;
+    --color-btn-action:      #F0E442;
+    --color-btn-action-text: #111827;
+    --color-header-text:     #005A8D;
+    --color-footer-bg:       #233B53;
+    --color-accent-glow:     rgba(86, 180, 233, 0.35);
+}
+
 /* ----------------------------------------------------------------
    RESET Y BASE
    ---------------------------------------------------------------- */
@@ -80,6 +95,18 @@ html, body {
     color: var(--color-text);
 }
 
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
 
 input,
 textarea,
@@ -90,6 +117,124 @@ optgroup,
 .btn,
 .form-label {
     font-family: inherit !important;
+}
+
+input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.preference-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.preference-controls__field {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: inherit;
+}
+
+.preference-controls__field select {
+    min-width: 110px;
+    border: 1.5px solid currentColor;
+    border-radius: 999px;
+    background: #FFFFFF;
+    color: var(--color-header-text);
+    padding: 7px 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.preference-controls__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1.5px solid currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    padding: 7px 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.preference-controls__toggle.is-active {
+    background: #F0E442;
+    border-color: #F0E442;
+    color: #111827;
+}
+
+.preference-controls--floating {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    padding: 10px;
+    border-radius: 14px;
+    background: #FFFFFF;
+    color: var(--color-header-text);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.admin-header .preference-controls {
+    justify-content: stretch;
+}
+
+.admin-header .preference-controls__field,
+.admin-header .preference-controls__toggle {
+    color: #FFFFFF;
+}
+
+.admin-header .preference-controls__field select {
+    width: 100%;
+    color: var(--color-bg);
+}
+
+body.theme-colorblind .hero {
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.66), rgba(0, 0, 0, 0.52)),
+        url('images/paisajeneiva.png');
+}
+
+body.theme-colorblind .public-footer {
+    background: var(--color-footer-bg);
+}
+
+body.theme-colorblind .map-status-line i {
+    color: #0072B2;
+}
+
+body.theme-colorblind .btn-trazado--deshacer {
+    background: #E69F00;
+    color: #111827;
+}
+
+body.theme-colorblind .btn-trazado--limpiar,
+body.theme-colorblind .map-error i {
+    color: #FFFFFF;
+}
+
+body.theme-colorblind .btn-trazado--limpiar {
+    background: #D55E00;
+}
+
+body.theme-colorblind .map-error i {
+    color: #D55E00;
 }
 
 /* Layout del mapa (sidebar + #map): se activa SOLO cuando la página
@@ -179,7 +324,7 @@ body.page-public {
     position: relative;
     height: 560px;
     background-image:
-        linear-gradient(rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.12)),
+        linear-gradient(rgba(0, 0, 0, 0.58), rgba(0, 0, 0, 0.42)),
         url('images/paisajeneiva.png');
     background-size: cover;
     background-position: center bottom;
@@ -354,7 +499,7 @@ body.page-public {
     font-size: 14px;       /* ← antes era 11px */
     font-weight: 700;
     letter-spacing: 2.5px;
-    color: #a8c060;
+    color: #FFFFFF;
     text-transform: uppercase;
     margin: 0 0 8px 0;
 }
@@ -377,7 +522,7 @@ body.page-public {
     gap: 8px;
 }
 .public-footer__contact .bi {
-    color: #a8c060;
+    color: #FFFFFF;
     font-size: 14px;
 }
 
@@ -415,6 +560,10 @@ body.page-public {
 body.page-login {
     background: #FFFFFF;
     color: #3B3B3B;
+    min-height: 100vh;
+}
+
+.login-main {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -507,6 +656,49 @@ body.page-login {
 .btn-login-submit:hover {
     background: var(--color-accent-light);
     color: #FFFFFF;
+}
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 24px 0;
+    color: rgba(59, 107, 122, 0.65);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(59, 107, 122, 0.22);
+}
+
+.btn-login-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 18px;
+    border: 1.5px solid var(--color-header-text);
+    border-radius: 50px;
+    background: #FFFFFF;
+    color: var(--color-header-text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn-login-google:hover {
+    background: rgba(74, 143, 163, 0.08);
+    border-color: var(--color-accent-light);
+    color: var(--color-header-text);
 }
 
 .btn-login-back {
@@ -814,9 +1006,9 @@ body.page-admin {
 }
 
 .admin-card__notice {
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 500;
-    color: rgba(255, 255, 255, 0.65);
+    color: #FFFFFF;
     text-align: center;
     line-height: 1.5;
     margin-top: 14px;
@@ -1055,6 +1247,43 @@ body.page-map #map {
     overflow: hidden;
 }
 
+.about-panel {
+    display: none;
+    width: 100%;
+    max-width: 900px;
+    min-height: 520px;
+    background: #FFFFFF;
+    border: 2px solid rgba(59, 107, 122, 0.18);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    padding: 64px 72px;
+    color: #2F3A2B;
+}
+
+.about-panel.is-visible {
+    display: block;
+}
+
+.about-panel h2 {
+    font-family: var(--font-display);
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--color-header-text);
+    margin-bottom: 24px;
+}
+
+.about-panel p {
+    font-size: 20px;
+    line-height: 1.75;
+    color: #344033;
+    margin: 0;
+}
+
+body.theme-colorblind .about-panel {
+    border-color: #0072B2;
+    color: #111827;
+}
+
 /* ================================================================
    SIDEBAR + MAPA (versión vieja) — CLASES EXISTENTES
    Conservadas por compatibilidad con map.js. El #map sigue siendo
@@ -1120,8 +1349,8 @@ body.page-map #map {
 }
 
 .brand-subtitle {
-    font-size: 11px;
-    color: var(--color-muted);
+    font-size: 14px;
+    color: #FFFFFF;
     letter-spacing: 0.3px;
     margin-top: 2px;
 }
@@ -1137,11 +1366,11 @@ body.page-map #map {
 }
 
 .section-label {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1.5px;
-    color: var(--color-muted);
+    color: #FFFFFF;
     margin-bottom: 10px;
 }
 
@@ -1194,8 +1423,8 @@ body.page-map #map {
 
 .route-desc {
     display: block;
-    font-size: 11px;
-    color: var(--color-muted);
+    font-size: 14px;
+    color: #FFFFFF;
     margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -1224,8 +1453,8 @@ body.page-map #map {
 }
 
 .info-desc {
-    font-size: 12px;
-    color: var(--color-muted);
+    font-size: 14px;
+    color: #FFFFFF;
     line-height: 1.5;
     margin-bottom: 12px;
 }
@@ -1241,9 +1470,9 @@ body.page-map #map {
     background: transparent;
     border: 1px solid var(--color-border);
     border-radius: 8px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
-    color: var(--color-muted);
+    color: #FFFFFF;
     cursor: pointer;
     transition: all 0.2s;
 }
@@ -1258,8 +1487,8 @@ body.page-map #map {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 12px;
-    color: var(--color-muted);
+    font-size: 14px;
+    color: #FFFFFF;
     margin-bottom: 8px;
 }
 
@@ -1274,8 +1503,8 @@ body.page-map #map {
     margin-top: auto;
     padding: 16px 20px;
     border-top: 1px solid var(--color-border);
-    font-size: 10px;
-    color: var(--color-muted);
+    font-size: 14px;
+    color: #FFFFFF;
     line-height: 1.7;
 }
 
@@ -1311,7 +1540,7 @@ body.page-map #map {
 }
 
 .admin-link {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     color: var(--color-accent);
     text-decoration: none;
