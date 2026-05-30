@@ -54,7 +54,11 @@ public class LoginController {
             Model model) {
 
         if (error != null) {
-            model.addAttribute("errorMsg", "Usuario o contraseña incorrectos.");
+            if ("google".equals(error)) {
+                model.addAttribute("errorMsg", "No se pudo iniciar sesion con Google. Verifica que el correo este registrado como administrador o editor.");
+            } else {
+                model.addAttribute("errorMsg", "Usuario o contraseña incorrectos.");
+            }
         }
         if (logout != null) {
             model.addAttribute("logoutMsg", "Sesión cerrada correctamente.");
