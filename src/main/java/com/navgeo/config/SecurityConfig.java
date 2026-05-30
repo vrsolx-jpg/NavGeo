@@ -120,6 +120,13 @@ public class SecurityConfig {
                 .requestMatchers("/admin/eliminar", "/admin/estadisticas", "/admin/editores").hasRole("ADMIN")
                 .requestMatchers("/admin/api/dashboard/**").hasRole("ADMIN")
 
+                    // Swagger UI: acceso público para documentación
+                    .requestMatchers(
+                            "/swagger-ui/**",
+                            "/swagger-ui.html",
+                            "/v3/api-docs/**"
+                    ).permitAll()
+
                 // Panel operativo: ADMIN y EDITOR.
                 .requestMatchers("/admin/**").hasAnyRole("ADMIN", "EDITOR")
 
