@@ -9,17 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * UsuarioDetailsService - Implementación de la interfaz UserDetailsService.
+ * UsuarioDetailsService - Puente entre Spring Security y la base de datos.
  *
- * Este servicio actúa como el "puente" entre Spring Security y la base de
- * datos. Cuando un usuario intenta iniciar sesión, Spring Security llama a
- * loadUserByUsername() para obtener el registro del usuario y luego compara
- * el hash de la contraseña ingresada con el hash almacenado en la BD.
+ * Cuando un usuario intenta iniciar sesión, Spring Security llama a
+ * loadUserByUsername() para obtener sus datos y comparar el hash
+ * de la contraseña ingresada con el hash almacenado en la BD.
  *
- * La anotación @Transactional es importante aquí porque la entidad Usuario
- * tiene relaciones JPA, y esta anotación garantiza que la sesión de Hibernate
- * esté abierta durante toda la ejecución del método, evitando el error
- * LazyInitializationException.
+ * @Transactional es necesario porque Usuario tiene @ManyToMany con Rol.
+ * Sin esta anotación, Hibernate cerraría la sesión antes de cargar
+ * los roles y lanzaría LazyInitializationException (aunque se use
+ * EAGER, el @Transactional garantiza consistencia).
  */
 @Service
 @RequiredArgsConstructor
@@ -27,25 +26,14 @@ public class UsuarioDetailsService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
 
-    /**
-     * Carga un usuario desde la base de datos dado su nombre de usuario.
-     *
-     * Spring Security invoca este método automáticamente durante el proceso
-     * de autenticación. El método retorna un UserDetails (nuestra entidad
-     * Usuario ya lo implementa), o lanza UsernameNotFoundException si no
-     * se encuentra el usuario, lo que resulta en un error 401.
-     *
-     * @param username el nombre de usuario ingresado en el formulario de login.
-     * @return el objeto Usuario con sus datos y rol cargados desde la BD.
-     */
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        return usuarioRepository.findByUsername(username)
+        return usuarioRepository.findByUsernameWithRoles(username)
                 .orElseThrow(() -> new UsernameNotFoundException(
-                        "Usuario no encontrado en la base de datos: " + username
+                        "Usuario no encontrado: " + username
                 ));
     }
 }

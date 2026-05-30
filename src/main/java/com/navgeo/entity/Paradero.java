@@ -34,8 +34,8 @@ public class Paradero {
     @Column(nullable = false, precision = 10, scale = 7)
     private BigDecimal longitud;
 
-    @Column(length = 300)
-    private String descripcion;
+    @Column(length = 7)
+    private String color = "#4F46E5";  // valor por defecto
 
     @Column(nullable = false)
     private boolean activo = true;

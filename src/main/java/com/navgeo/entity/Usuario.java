@@ -5,22 +5,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Usuario - Entidad JPA que representa a un administrador del sistema NavGeo.
  *
- * Esta clase implementa la interfaz UserDetails de Spring Security. Esto permite
- * que Spring Security utilice directamente los objetos Usuario para validar
- * credenciales, sin necesidad de conversiones intermedias.
+ * Implementa UserDetails de Spring Security para validación directa
+ * de credenciales sin conversiones intermedias.
  *
- * La anotación @Entity indica a JPA que esta clase debe mapearse a una tabla
- * en la base de datos. La anotación @Table especifica el nombre exacto.
+ * CAMBIO RESPECTO A LA VERSIÓN ANTERIOR:
+ * El campo String 'rol' fue reemplazado por una relación @ManyToMany
+ * con la entidad Rol, a través de la tabla intermedia 'usuarios_roles'.
+ * Esto permite asignar múltiples roles a un mismo usuario.
  */
 @Entity
 @Table(name = "usuarios")
@@ -35,14 +38,12 @@ public class Usuario implements UserDetails {
 
     /**
      * Nombre de usuario único para el login.
-     * La restricción @Column(unique = true) crea una restricción UNIQUE en la BD.
      */
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
     /**
-     * Hash BCrypt de la contraseña. NUNCA se almacena el texto plano.
-     * La longitud 255 es suficiente para cualquier hash BCrypt (60-72 chars).
+     * Hash BCrypt de la contraseña. NUNCA se almacena texto plano.
      */
     @Column(nullable = false, length = 255)
     private String password;
@@ -53,13 +54,6 @@ public class Usuario implements UserDetails {
     @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    /**
-     * Rol del usuario. Spring Security requiere el prefijo "ROLE_".
-     * Valores válidos: ROLE_ADMIN, ROLE_VIEWER (validado en la BD con CHECK).
-     */
-    @Column(nullable = false, length = 20)
-    private String rol;
-
     @Column(nullable = false)
     private boolean activo = true;
 
@@ -67,8 +61,30 @@ public class Usuario implements UserDetails {
     private LocalDateTime creadoEn;
 
     /**
+     * Roles asignados al usuario.
+     *
+     * @ManyToMany: un usuario puede tener varios roles y un rol puede
+     *              pertenecer a varios usuarios.
+     *
+     * fetch = EAGER: los roles se cargan junto con el usuario en la misma
+     *                consulta. Necesario para que Spring Security los tenga
+     *                disponibles de inmediato al autenticar.
+     *
+     * @JoinTable: define la tabla intermedia 'usuarios_roles' con sus FKs.
+     *
+     * cascade = MERGE: si modificas un rol desde el usuario, se propaga.
+     *                  NO se usa REMOVE para evitar borrar roles globales.
+     */
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable(
+            name = "usuarios_roles",
+            joinColumns        = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "rol_id")
+    )
+    private Set<Rol> roles = new HashSet<>();
+
+    /**
      * Se ejecuta automáticamente antes del primer INSERT.
-     * Garantiza que creado_en siempre tenga valor sin depender de la BD.
      */
     @PrePersist
     protected void onCreate() {
@@ -76,19 +92,36 @@ public class Usuario implements UserDetails {
     }
 
     // ---------------------------------------------------------------
+    // Métodos helper para manejar roles cómodamente
+    // ---------------------------------------------------------------
+
+    /** Agrega un rol al usuario (útil al crear o editar usuarios). */
+    public void agregarRol(Rol rol) {
+        this.roles.add(rol);
+    }
+
+    /** Quita un rol específico del usuario. */
+    public void quitarRol(Rol rol) {
+        this.roles.remove(rol);
+    }
+
+    // ---------------------------------------------------------------
     // Métodos de UserDetails (requeridos por Spring Security)
     // ---------------------------------------------------------------
 
     /**
-     * Retorna los roles/permisos del usuario como objetos GrantedAuthority.
-     * Spring Security los usa para evaluar reglas como hasRole("ADMIN").
+     * Retorna los roles del usuario. Como Rol implementa GrantedAuthority,
+     * se retorna el Set directamente sin conversiones.
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(this.rol));
+        // Convierte cada Rol a SimpleGrantedAuthority aquí,
+        // en lugar de que Rol implemente GrantedAuthority directamente.
+        // Esto evita el conflicto entre los proxies de Hibernate y Spring Security.
+        return this.roles.stream()
+                .map(rol -> new SimpleGrantedAuthority(rol.getNombre()))
+                .collect(Collectors.toList());
     }
-
-    /** La cuenta está activa si el campo activo = true. */
     @Override
     public boolean isAccountNonExpired() { return true; }
 
