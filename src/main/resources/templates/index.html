@@ -13,153 +13,122 @@
 </head>
 <body class="page-map">
 
-<!-- HEADER PÚBLICO: barra blanca con logo + nav -->
+<!-- HEADER PÚBLICO -->
 <header class="public-header">
     <div class="public-header__brand">
-        <img th:src="@{/css/images/LOGO.png}" src="/css/images/LOGO.png" alt="Logo NavGeo">
+        <img th:src="@{/css/images/LOGO.png}" src="/css/images/LOGO.png" alt="" aria-hidden="true">
         <span class="public-header__brand-name">NAVGEO</span>
     </div>
     <nav class="public-header__nav">
-        <a href="/index.html">Inicio</a>
-        <a href="#rutas" class="active">Rutas</a>
-        <a href="/login">Administración</a>
+        <a href="#inicio" class="active" onclick="mostrarMapaPrincipal(event)">Inicio</a>
+        <a href="#nosotros" onclick="mostrarNosotros(event)">Nosotros</a>
+        <a href="/login"><i class="bi bi-person-circle me-1"></i> Iniciar sesión</a>
     </nav>
 </header>
 
-<!-- HERO: banner con paisaje de Neiva (paisajeneiva.png) sobre la barra de búsqueda -->
-<section class="hero">
-    <h1 class="hero__title">CONOCE NUESTRAS RUTAS Y PARADEROS</h1>
-    <p class="hero__subtitle">Transporte Público NEIVA</p>
+<!-- HERO -->
+<main>
 
+<section class="hero" aria-labelledby="home-title">
+    <h1 class="hero__title" id="home-title">CONOCE NUESTRAS RUTAS Y PARADEROS</h1>
+    <h2 class="hero__subtitle">Transporte Público NEIVA</h2>
     <div class="wave-bottom" aria-hidden="true"></div>
 </section>
 
-<!--
-    SECCIÓN DE BÚSQUEDA: barra con autocompletado + pills de rutas.
-    Los IDs (btn-todas, btn-ruta-NN) y la clase .route-btn se preservan
-    porque map.js los usa para actualizarBotonesActivos(). El #status-text
-    también es esperado por map.js.
--->
-<section class="map-search-section" id="rutas">
+<!-- SECCIÓN DE BÚSQUEDA -->
+<section class="map-search-section" id="rutas" aria-label="Busqueda de rutas">
 
-    <div class="map-search-bar">
+    <div class="map-search-bar" style="position: relative;">
+        <label for="map-search-input" class="sr-only">Buscar ruta</label>
         <input id="map-search-input"
                type="text"
                placeholder="Buscar ruta (ej: Ruta 11)..."
-               list="rutas-disponibles"
+               aria-label="Buscar ruta"
+               autocomplete="off"
+               oninput="filtrarDropdown()"
+               onfocus="mostrarDropdown()"
                onkeydown="if(event.key==='Enter'){event.preventDefault();buscarRuta();}">
-        <datalist id="rutas-disponibles">
-            <option value="Ruta 11">
-            <option value="Ruta 19">
-            <option value="Ruta 33">
-            <option value="Ruta 60">
-            <option value="Todas">
-        </datalist>
+
+        <!-- Dropdown personalizado -->
+        <div id="rutas-dropdown" style="
+            display: none;
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            width: 100%;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            z-index: 999;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        ">
+            <div id="rutas-lista"></div>
+        </div>
+
         <button type="button" onclick="buscarRuta()">
             <i class="bi bi-search me-1"></i> Buscar
         </button>
     </div>
 
-    <div class="map-route-pills">
-        <button id="btn-todas" class="route-btn active"
-                onclick="mostrarTodasLasRutas()">Todas</button>
-        <button id="btn-ruta-11" class="route-btn"
-                onclick="seleccionarRuta(1, 'Ruta 11')">Ruta 11</button>
-        <button id="btn-ruta-19" class="route-btn"
-                onclick="seleccionarRuta(2, 'Ruta 19')">Ruta 19</button>
-        <button id="btn-ruta-33" class="route-btn"
-                onclick="seleccionarRuta(3, 'Ruta 33')">Ruta 33</button>
-        <button id="btn-ruta-60" class="route-btn"
-                onclick="seleccionarRuta(4, 'Ruta 60')">Ruta 60</button>
-    </div>
-
     <div class="map-status-line" id="status-text">
         <i class="bi bi-reception-4"></i> Mostrando todas las rutas activas
     </div>
+
 </section>
 
-<!--
-    CONTENEDOR DEL MAPA REAL.
-    NO MODIFICAR el div #map ni el script de Google Maps API:
-    la API inyecta el mapa interactivo dentro de este div.
--->
-<main class="map-main">
+<!-- Cierra el dropdown al hacer clic fuera -->
+<script>
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.map-search-bar')) {
+            document.getElementById('rutas-dropdown').style.display = 'none';
+        }
+    });
+</script>
+
+<!-- MAPA -->
+<div class="map-main">
     <div id="map"></div>
+    <section id="about-panel" class="about-panel" aria-live="polite">
+        <h2>¿Quiénes somos?</h2>
+        <p>
+            NavGeo es una plataforma web de acceso libre interactiva, nacida en el proyecto final de Programación web en la Universidad Surcolombiana. Nuestro propósito fundamental es el fácil acceso a la información del transporte público urbano en la ciudad de Neiva. A través de la digitalización, centralizamos los recorridos y paraderos de los buses para ofrecer una herramienta moderna e intuitiva que transforme la experiencia de movilidad de los ciudadanos.
+        </p>
+    </section>
+</div>
+
 </main>
 
-<!-- FOOTER VERDE (mismo que el landing) -->
-<!-- FOOTER VERDE (mismo que el landing) -->
+<!-- FOOTER -->
 <footer class="public-footer">
     <div class="public-footer__grid">
-
-        <!-- Columna izquierda: logo + nombre -->
         <div class="public-footer__brand">
             <img th:src="@{/css/images/LOGO.png}"
-                 src="/css/images/LOGO.png"
-                 alt="Logo NavGeo">
+                 src="/css/images/LOGO.png" alt="" aria-hidden="true">
             <span class="public-footer__brand-name">NAVGEO</span>
         </div>
-
-        <!-- Columna central: contáctanos -->
         <div class="public-footer__contact">
             <h3 class="public-footer__heading">CONTÁCTANOS</h3>
             <p><i class="bi bi-envelope-fill me-2"></i>contacto@navgeo.co</p>
             <p><i class="bi bi-telephone-fill me-2"></i>+57 123-456-789</p>
             <p><i class="bi bi-geo-alt-fill me-2"></i>Neiva, Huila — Colombia</p>
         </div>
-
-        <!-- Columna derecha: síguenos -->
         <div class="public-footer__social">
             <h3 class="public-footer__heading">SÍGUENOS</h3>
             <p>@NavGeo_</p>
             <div class="public-footer__social-icons">
-                <a href="#" aria-label="Facebook">
-                    <i class="bi bi-facebook"></i>
-                </a>
-                <a href="#" aria-label="Instagram">
-                    <i class="bi bi-instagram"></i>
-                </a>
-                <a href="#" aria-label="X (antes Twitter)">
-                    <i class="bi bi-twitter-x"></i>
-                </a>
+                <a href="https://www.facebook.com/" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="https://www.instagram.com/" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="https://x.com/" aria-label="X (antes Twitter)"><i class="bi bi-twitter-x"></i></a>
             </div>
         </div>
-
     </div>
 </footer>
-<!-- ================================================================
-     SCRIPTS — map.js NO se modifica
-     ================================================================ -->
+
+<!-- map.js va PRIMERO — define todas las funciones incluyendo buscarRuta -->
+<script src="/js/preferences.js"></script>
 <script src="/js/map.js"></script>
 
-<!-- Wrapper inline para el campo de búsqueda. Mapea el texto del
-     input a la función seleccionarRuta() que ya existe en map.js. -->
-<script>
-    function buscarRuta() {
-        const v = document.getElementById('map-search-input').value.trim().toLowerCase();
-        const mapeo = {
-            'ruta 11': { id: 1, nombre: 'Ruta 11' },
-            'ruta 19': { id: 2, nombre: 'Ruta 19' },
-            'ruta 33': { id: 3, nombre: 'Ruta 33' },
-            'ruta 60': { id: 4, nombre: 'Ruta 60' },
-            '11': { id: 1, nombre: 'Ruta 11' },
-            '19': { id: 2, nombre: 'Ruta 19' },
-            '33': { id: 3, nombre: 'Ruta 33' },
-            '60': { id: 4, nombre: 'Ruta 60' }
-        };
-        if (mapeo[v]) {
-            seleccionarRuta(mapeo[v].id, mapeo[v].nombre);
-        } else if (v === '' || v === 'todas') {
-            mostrarTodasLasRutas();
-        }
-    }
-</script>
-
-<!--
-    GOOGLE MAPS API — NO MODIFICAR.
-    Carga la API con la clave inyectada por el backend (googleMapsApiKey).
-    El callback initMap() está definido en map.js.
--->
 <script th:if="${googleMapsApiKey != null and !googleMapsApiKey.isBlank()}"
         th:src="@{'https://maps.googleapis.com/maps/api/js'(key=${googleMapsApiKey},callback='initMap',loading='async')}"
         async defer>

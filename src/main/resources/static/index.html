@@ -16,20 +16,22 @@
 <!-- HEADER PÚBLICO: barra blanca con logo + nav -->
 <header class="public-header">
     <div class="public-header__brand">
-        <img src="/css/images/LOGO.png" alt="Logo NavGeo">
+        <img src="/css/images/LOGO.png" alt="" aria-hidden="true">
         <span class="public-header__brand-name">NAVGEO</span>
     </div>
     <nav class="public-header__nav">
         <a href="/index.html" class="active">Inicio</a>
-        <a href="/nosotros.html">Nosotros</a>
-        <a href="/login">Administración</a>
+        <a href="#nosotros">Nosotros</a>
+        <a href="/login"><i class="bi bi-person-circle me-1"></i> Iniciar sesión</a>
     </nav>
 </header>
 
 <!-- HERO: paisaje de Neiva con título centrado -->
-<section class="hero">
-    <h1 class="hero__title">CONOCE NUESTRAS RUTAS Y PARADEROS</h1>
-    <p class="hero__subtitle">Transporte Público NEIVA</p>
+<main>
+
+<section class="hero" aria-labelledby="home-title">
+    <h1 class="hero__title" id="home-title">CONOCE NUESTRAS RUTAS Y PARADEROS</h1>
+    <h2 class="hero__subtitle">Transporte Público NEIVA</h2>
 
     <!-- Olas decorativas blancas en la parte inferior del hero (dos capas para relieve) -->
     <div class="wave-bottom" aria-hidden="true">
@@ -43,9 +45,9 @@
 </section>
 
 <!-- CUERPO: 2 columnas (texto + imagen estática del mapa) -->
-<section class="explore-section">
+<section class="explore-section" id="nosotros" aria-labelledby="about-title">
     <div class="explore-section__text">
-        <h2 class="explore-section__title">Explora las rutas disponibles &rarr;</h2>
+        <h2 class="explore-section__title" id="about-title">Explora las rutas disponibles &rarr;</h2>
         <p class="explore-section__paragraph">
             NavGeo es la plataforma oficial de visualización de rutas y paraderos
             del Sistema Estratégico de Transporte Público de Neiva. Consulta
@@ -70,11 +72,13 @@
     </div>
 </section>
 
+</main>
+
 <!-- FOOTER: 3 columnas (sin ola decorativa, borde superior recto) -->
 <footer class="public-footer">
     <div class="public-footer__grid">
         <div class="public-footer__brand">
-            <img src="/css/images/LOGO.png" alt="Logo NavGeo">
+            <img src="/css/images/LOGO.png" alt="" aria-hidden="true">
             <span class="public-footer__brand-name">NAVGEO</span>
         </div>
 
@@ -88,13 +92,14 @@
         <div class="public-footer__social">
             <h3 class="public-footer__heading">Siguenos</h3>
             <div class="public-footer__social-icons">
-                <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                <a href="#" aria-label="X (antes Twitter)"><i class="bi bi-twitter-x"></i></a>
+                <a href="https://www.facebook.com/" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="https://www.instagram.com/" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="https://x.com/" aria-label="X (antes Twitter)"><i class="bi bi-twitter-x"></i></a>
             </div>
         </div>
     </div>
 </footer>
 
+<script src="/js/preferences.js"></script>
 </body>
 </html>
