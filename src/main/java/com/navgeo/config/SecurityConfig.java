@@ -1,12 +1,15 @@
 package com.navgeo.config;
 
 import com.navgeo.security.UsuarioDetailsService;
+import com.navgeo.security.GoogleOAuth2UsuarioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -33,10 +36,12 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
  */
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final UsuarioDetailsService usuarioDetailsService;
+    private final GoogleOAuth2UsuarioService googleOAuth2UsuarioService;
 
     /**
      * PasswordEncoder - Bean que define el algoritmo de cifrado de contraseñas.
@@ -93,6 +98,9 @@ public class SecurityConfig {
             // -------------------------------------------------------
             // REGLAS DE AUTORIZACIÓN (quién puede acceder a qué)
             // -------------------------------------------------------
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/admin/api/**")
+                )
             .authorizeHttpRequests(auth -> auth
 
                 // RECURSOS ESTÁTICOS: siempre públicos.
@@ -103,15 +111,23 @@ public class SecurityConfig {
                 .requestMatchers("/api/rutas/**", "/api/paraderos/**").permitAll()
 
                 // PÁGINA PRINCIPAL: el mapa es de acceso público.
-                .requestMatchers("/", "/index", "/login").permitAll()
+                .requestMatchers("/", "/index", "/login", "/oauth2/**", "/login/oauth2/**").permitAll()
 
-                // PANEL ADMIN: requiere autenticación con rol ADMIN.
-                // Cubre TODAS las sub-rutas: /admin/dashboard, /admin/rutas, etc.
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/api/rutas/**", "/api/paraderos/**").permitAll()
+
+                // Acciones destructivas y gestión de usuarios: solo ADMIN.
+                .requestMatchers(HttpMethod.DELETE, "/admin/api/**").hasRole("ADMIN")
+                .requestMatchers("/admin/eliminar", "/admin/estadisticas", "/admin/editores").hasRole("ADMIN")
+                .requestMatchers("/admin/api/dashboard/**").hasRole("ADMIN")
+
+                // Panel operativo: ADMIN y EDITOR.
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "EDITOR")
 
                 // POLÍTICA POR DEFECTO: cualquier otra ruta no listada
                 // requiere que el usuario esté autenticado.
                 .anyRequest().authenticated()
+
+
             )
 
             // -------------------------------------------------------
@@ -129,6 +145,19 @@ public class SecurityConfig {
 
                 // Permite el acceso a /login sin autenticación.
                 .permitAll()
+            )
+
+            // -------------------------------------------------------
+            // LOGIN CON GOOGLE
+            // -------------------------------------------------------
+            .oauth2Login(oauth2 -> oauth2
+                .loginPage("/login")
+                .defaultSuccessUrl("/admin/dashboard", true)
+                .failureHandler((request, response, exception) ->
+                    response.sendRedirect("/login?error=google"))
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(googleOAuth2UsuarioService)
+                )
             )
 
             // -------------------------------------------------------
